@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cashback | Shoe Connection</title>
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --muted: #6b6b6b;
+    --line: #e2e2e2;
+    --bg: #ffffff;
+    --panel: #f7f7f7;
+    --ok: #16a34a;
+    --ok-bg: #e9f9ef;
+    --err: #dc2626;
+    --err-bg: #fdecea;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    margin: 0;
+    padding: 24px 16px 60px;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+
+  .logo-wrap { text-align: center; margin-bottom: 24px; }
+  .logo-wrap img {
+    max-width: 260px; width: 100%;
+    filter: invert(1);
+  }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .tab-btn {
+    flex: 1; padding: 10px 4px; border: none; background: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active { color: var(--ink); border-bottom: 2px solid var(--ink); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px; margin-bottom: 14px;
+  }
+
+  label { display: block; font-size: 12px; margin: 12px 0 4px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+  input {
+    width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; background: #fff; color: var(--ink);
+  }
+  input:focus { outline: none; border-color: var(--ink); }
+
+  button.primary {
+    width: 100%; margin-top: 16px; padding: 12px; border: none; border-radius: 8px;
+    background: var(--ink); color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.secondary {
+    width: 100%; margin-top: 8px; padding: 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: #fff; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  .msg { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 13px; display: none; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); display: block; }
+  .msg.erro { background: var(--err-bg); color: var(--err); display: block; }
+
+  .result-card {
+    border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 10px; background: #fff;
+  }
+  .result-card .nome { font-weight: 700; font-size: 15px; }
+  .result-card .info { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .result-card .saldo { font-size: 20px; font-weight: 700; margin: 8px 0 2px; }
+
+  .step-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+  .destaque { font-size: 26px; font-weight: 700; text-align: center; margin: 10px 0; }
+  .subinfo { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="logo-wrap">
+    <img src="logo.jpg" alt="Shoe Connection">
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="mudarAba('cadastro')">Cadastrar</button>
+    <button class="tab-btn" onclick="mudarAba('venda')">Venda</button>
+    <button class="tab-btn" onclick="mudarAba('consulta')">Consultar</button>
+  </div>
+
+  <!-- CADASTRO -->
+  <div id="cadastro" class="panel active">
+    <div class="card">
+      <label>Nome do cliente</label>
+      <input id="c-nome" type="text" placeholder="Ex: Maria Silva">
+      <label>Celular (com DDD)</label>
+      <input id="c-celular" type="tel" placeholder="Ex: 11999998888">
+      <label>Data de aniversário</label>
+      <input id="c-aniversario" type="date">
+      <button class="primary" onclick="cadastrarCliente()">Cadastrar cliente</button>
+      <div id="msg-cadastro" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- REGISTRAR VENDA -->
+  <div id="venda" class="panel">
+    <div class="card">
+      <label>Celular do cliente</label>
+      <input id="v-celular" type="tel" placeholder="Ex: 11999998888">
+      <label>Número do cupom</label>
+      <input id="v-cupom" type="text" placeholder="Ex: 000123">
+      <label>Valor da compra (R$)</label>
+      <input id="v-valor" type="number" step="0.01" placeholder="Ex: 250.00">
+      <button class="primary" onclick="registrarVenda()">Lançar venda</button>
+      <div id="msg-venda" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- CONSULTA -->
+  <div id="consulta" class="panel">
+    <div class="card">
+      <label>Buscar por nome ou celular</label>
+      <input id="q-termo" type="text" placeholder="Ex: Maria ou 11999998888">
+      <button class="primary" onclick="consultarCliente()">Buscar</button>
+      <div id="msg-consulta" class="msg"></div>
+    </div>
+    <div id="resultados"></div>
+  </div>
+
+  <!-- RESGATE (aberto a partir da consulta) -->
+  <div id="resgate" class="panel">
+    <div class="card">
+      <div class="step-title">Resgatar cashback</div>
+      <div id="rg-cliente-info" class="info" style="margin-bottom:10px;"></div>
+
+      <div id="rg-step-valor">
+        <label>Valor da venda atual (R$)</label>
+        <input id="rg-valor" type="number" step="0.01" placeholder="Ex: 150.00">
+        <button class="primary" onclick="verificarResgate()">Verificar</button>
+        <div id="msg-rg-valor" class="msg"></div>
+      </div>
+
+      <div id="rg-step-codigo" style="display:none;">
+        <div class="destaque" id="rg-valor-aplicavel"></div>
+        <div class="subinfo">cashback aplicável nessa venda</div>
+        <label>Código informado pelo cliente</label>
+        <input id="rg-codigo" type="text" placeholder="Ex: A1B2C3" style="text-transform:uppercase">
+        <button class="primary" onclick="confirmarCodigo()">Confirmar código</button>
+        <div id="msg-rg-codigo" class="msg"></div>
+      </div>
+
+      <div id="rg-step-finalize" style="display:none;">
+        <div class="destaque" id="rg-desconto-final"></div>
+        <div class="subinfo">de desconto será aplicado na venda</div>
+        <button class="primary" onclick="avancarParaCupom()">Ok</button>
+      </div>
+
+      <div id="rg-step-cupom" style="display:none;">
+        <label>Número do cupom dessa venda</label>
+        <input id="rg-cupom" type="text" placeholder="Ex: 000456">
+        <button class="primary" onclick="finalizarResgate()">Finalizar resgate</button>
+        <div id="msg-rg-final" class="msg"></div>
+      </div>
+
+      <button class="secondary" onclick="mudarAba('consulta')">Voltar para consulta</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+  let resgateAtual = { celular: "", nome: "", valorVenda: 0, valorAplicavel: 0, codigo: "" };
+
+  function mudarAba(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if (b.getAttribute('onclick') === `mudarAba('${id}')`) b.classList.add('active');
+    });
+  }
+
+  async function chamarApi(payload) {
+    const resp = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    return resp.json();
+  }
+
+  function mostrarMsg(id, texto, ok) {
+    const el = document.getElementById(id);
+    el.textContent = texto;
+    el.className = "msg " + (ok ? "ok" : "erro");
+  }
+
+  // ---------- CADASTRO ----------
+  async function cadastrarCliente() {
+    const nome = document.getElementById('c-nome').value.trim();
+    const celular = document.getElementById('c-celular').value.trim();
+    const aniversario = document.getElementById('c-aniversario').value;
+    if (!nome || !celular) { mostrarMsg('msg-cadastro', 'Preencha nome e celular.', false); return; }
+
+    const res = await chamarApi({ acao: "cadastrarCliente", nome, celular, aniversario });
+    mostrarMsg('msg-cadastro', res.mensagem, res.sucesso);
+    if (res.sucesso) {
+      document.getElementById('c-nome').value = '';
+      document.getElementById('c-celular').value = '';
+      document.getElementById('c-aniversario').value = '';
+    }
+  }
+
+  // ---------- VENDA ----------
+  async function registrarVenda() {
+    const celular = document.getElementById('v-celular').value.trim();
+    const cupom = document.getElementById('v-cupom').value.trim();
+    const valor = document.getElementById('v-valor').value;
+    if (!celular || !cupom || !valor) { mostrarMsg('msg-venda', 'Preencha todos os campos.', false); return; }
+
+    const res = await chamarApi({ acao: "registrarVenda", celular, cupom, valor });
+    if (res.sucesso) {
+      mostrarMsg('msg-venda', `Cashback de R$ ${res.cashback_gerado.toFixed(2)} gerado. Saldo total: R$ ${res.saldo_total.toFixed(2)}. Código: ${res.codigo}. Mensagem enviada no WhatsApp.`, true);
+      document.getElementById('v-cupom').value = '';
+      document.getElementById('v-valor').value = '';
+    } else {
+      mostrarMsg('msg-venda', res.mensagem, false);
+    }
+  }
+
+  // ---------- CONSULTA ----------
+  async function consultarCliente() {
+    const termo = document.getElementById('q-termo').value.trim();
+    const container = document.getElementById('resultados');
+    container.innerHTML = '';
+    if (!termo) { mostrarMsg('msg-consulta', 'Digite um nome ou celular.', false); return; }
+
+    const res = await chamarApi({ acao: "consultarCliente", termo });
+    if (!res.sucesso) { mostrarMsg('msg-consulta', res.mensagem, false); return; }
+
+    document.getElementById('msg-consulta').style.display = 'none';
+    res.clientes.forEach(cliente => {
+      const div = document.createElement('div');
+      div.className = 'result-card';
+      div.innerHTML = `
+        <div class="nome">${cliente.nome}</div>
+        <div class="info">${cliente.celular}</div>
+        <div class="saldo">R$ ${cliente.saldo_cashback.toFixed(2)}</div>
+        <div class="info">${cliente.data_expiracao ? 'Parte mais próxima vence em ' + cliente.data_expiracao : 'Sem cashback disponível'}</div>
+        <div class="info">Cashback aplicável: até 10% do valor de cada compra</div>
+        <button class="secondary" ${cliente.saldo_cashback <= 0 ? 'disabled' : ''} onclick="abrirResgate('${cliente.celular}', '${cliente.nome.replace(/'/g, "\\'")}', ${cliente.saldo_cashback})">Resgatar</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // ---------- RESGATE ----------
+  function abrirResgate(celular, nome, saldo) {
+    resgateAtual = { celular, nome, valorVenda: 0, valorAplicavel: 0, codigo: "" };
+    document.getElementById('rg-cliente-info').textContent = `${nome} • ${celular} • saldo R$ ${saldo.toFixed(2)}`;
+    document.getElementById('rg-step-valor').style.display = 'block';
+    document.getElementById('rg-step-codigo').style.display = 'none';
+    document.getElementById('rg-step-finalize').style.display = 'none';
+    document.getElementById('rg-step-cupom').style.display = 'none';
+    document.getElementById('rg-valor').value = '';
+    document.getElementById('rg-codigo').value = '';
+    document.getElementById('rg-cupom').value = '';
+    document.getElementById('msg-rg-valor').style.display = 'none';
+    document.getElementById('msg-rg-codigo').style.display = 'none';
+    document.getElementById('msg-rg-final').style.display = 'none';
+    mudarAba('resgate');
+  }
+
+  async function verificarResgate() {
+    const valorVenda = parseFloat(document.getElementById('rg-valor').value);
+    if (!valorVenda) { mostrarMsg('msg-rg-valor', 'Informe o valor da venda.', false); return; }
+
+    const res = await chamarApi({ acao: "verificarResgate", celular: resgateAtual.celular, valorVenda });
+    if (!res.sucesso) { mostrarMsg('msg-rg-valor', res.mensagem, false); return; }
+
+    resgateAtual.valorVenda = valorVenda;
+    resgateAtual.valorAplicavel = res.valor_aplicavel;
+    document.getElementById('rg-valor-aplicavel').textContent = `R$ ${res.valor_aplicavel.toFixed(2)}`;
+    document.getElementById('rg-step-codigo').style.display = 'block';
+    document.getElementById('msg-rg-valor').style.display = 'none';
+  }
+
+  function confirmarCodigo() {
+    const codigo = document.getElementById('rg-codigo').value.trim();
+    if (!codigo) { mostrarMsg('msg-rg-codigo', 'Digite o código.', false); return; }
+    resgateAtual.codigo = codigo;
+    document.getElementById('rg-desconto-final').textContent = `R$ ${resgateAtual.valorAplicavel.toFixed(2)}`;
+    document.getElementById('rg-step-codigo').style.display = 'none';
+    document.getElementById('rg-step-finalize').style.display = 'block';
+  }
+
+  function avancarParaCupom() {
+    document.getElementById('rg-step-finalize').style.display = 'none';
+    document.getElementById('rg-step-cupom').style.display = 'block';
+  }
+
+  async function finalizarResgate() {
+    const cupomVenda = document.getElementById('rg-cupom').value.trim();
+    if (!cupomVenda) { mostrarMsg('msg-rg-final', 'Digite o número do cupom.', false); return; }
+
+    const res = await chamarApi({
+      acao: "confirmarResgate",
+      celular: resgateAtual.celular,
+      codigo: resgateAtual.codigo,
+      valorVenda: resgateAtual.valorVenda,
+      cupomVenda
+    });
+
+    if (res.sucesso) {
+      mostrarMsg('msg-rg-final', `Resgate concluído: R$ ${res.desconto.toFixed(2)} aplicado. Saldo restante: R$ ${res.saldo_restante.toFixed(2)}.`, true);
+      document.getElementById('rg-step-cupom').style.display = 'none';
+    } else {
+      mostrarMsg('msg-rg-final', res.mensagem, false);
+    }
+  }
+</script>
+
+</body>
+</html>
